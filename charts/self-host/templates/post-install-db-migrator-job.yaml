@@ -50,6 +50,7 @@ spec:
           {{- if .Values.database.enabled }}
           - name: mssql-data
             mountPath: /db
+            subPath:  db/data
           {{- end }}
       containers:
       - name: migrate-db

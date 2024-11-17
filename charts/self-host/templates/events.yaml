@@ -42,6 +42,7 @@ spec:
         volumeMounts:
           - name: applogs
             mountPath: /logs
+            subPath: applogs/events
     {{- end }}
       containers:
       - name: {{ template "bitwarden.events" . }}
@@ -78,7 +79,7 @@ spec:
         {{- if .Values.volume.logs.enabled }}
         - name: applogs
           mountPath: /etc/bitwarden/logs
-          subPath: events
+          subPath: applogs/events
         {{- end }}
         securityContext:
 {{ toYaml .Values.component.events.securityContext | indent 10 }}

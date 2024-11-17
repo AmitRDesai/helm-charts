@@ -42,6 +42,7 @@ spec:
         volumeMounts:
           - name: applogs
             mountPath: /logs
+            subPath: applogs/api
     {{- end }}
       containers:
       - name: {{ template "bitwarden.api" . }}
@@ -70,16 +71,19 @@ spec:
         resources:
 {{ toYaml .Values.component.api.resources | indent 10 }}
         volumeMounts:
-        - name: attachments
+        - name: data
           mountPath: /etc/bitwarden/core/attachments
-        - name: dataprotection
+          subPath: attachments
+        - name: data
           mountPath: /etc/bitwarden/core/aspnet-dataprotection
-        - name: licenses
+          subPath: dataprotection
+        - name: data
           mountPath: /etc/bitwarden/core/licenses
+          subPath: licenses
         {{- if .Values.volume.logs.enabled }}
-        - name: applogs
+        - name: data
           mountPath: /etc/bitwarden/logs
-          subPath: api
+          subPath: applogs/api
         {{- end }}
         {{- if .Values.secrets.secretProviderClass }}
         - name: secrets-store-inline
@@ -89,20 +93,9 @@ spec:
         securityContext:
 {{ toYaml .Values.component.api.securityContext | indent 10 }}
       volumes:
-        - name: dataprotection
+        - name: data
           persistentVolumeClaim:
             claimName: {{ default ( include "bitwarden.dataprotection" . ) .Values.volume.dataprotection.existingClaim }}
-        - name: attachments
-          persistentVolumeClaim:
-            claimName: {{ default ( include "bitwarden.attachments" . ) .Values.volume.attachments.existingClaim }}
-        - name: licenses
-          persistentVolumeClaim:
-            claimName: {{ default ( include "bitwarden.licenses" . ) .Values.volume.licenses.existingClaim }}
-        {{- if .Values.volume.logs.enabled }}
-        - name: applogs
-          persistentVolumeClaim:
-            claimName: {{ default ( include "bitwarden.applogs" . ) .Values.volume.logs.existingClaim }}
-        {{- end }}
         {{- if .Values.secrets.secretProviderClass }}
         - name: secrets-store-inline
           csi:

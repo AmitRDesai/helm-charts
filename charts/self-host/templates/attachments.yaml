@@ -58,6 +58,7 @@ spec:
         volumeMounts:
         - name: attachments
           mountPath: /etc/bitwarden/core/attachments
+          subPath: attachments
         {{- if .Values.secrets.secretProviderClass }}
         - name: secrets-store-inline
           mountPath: "/mnt/secrets-store"

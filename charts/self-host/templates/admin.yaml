@@ -70,14 +70,16 @@ spec:
         resources:
 {{ toYaml .Values.component.admin.resources | indent 10 }}
         volumeMounts:
-        - name: dataprotection
+        - name: data
           mountPath: /etc/bitwarden/core/aspnet-dataprotection
-        - name: licenses
+          subPath: dataprotection
+        - name: data
           mountPath: /etc/bitwarden/core/licenses
+          subPath: licenses
         {{- if .Values.volume.logs.enabled }}
-        - name: applogs
+        - name: data
           mountPath: /etc/bitwarden/logs
-          subPath: admin
+          subPath: applogs/admin
         {{- end }}
         {{- if .Values.secrets.secretProviderClass }}
         - name: secrets-store-inline
@@ -87,18 +89,10 @@ spec:
         securityContext:
 {{ toYaml .Values.component.admin.securityContext | indent 10 }}
       volumes:
-        - name: dataprotection
+        - name: data
           persistentVolumeClaim:
             claimName: {{ default ( include "bitwarden.dataprotection" . ) .Values.volume.dataprotection.existingClaim }}
-        - name: licenses
-          persistentVolumeClaim:
-            claimName: {{ default ( include "bitwarden.licenses" . ) .Values.volume.licenses.existingClaim }}
-        {{- if .Values.volume.logs.enabled }}
-        - name: applogs
-          persistentVolumeClaim:
-            claimName: {{ default ( include "bitwarden.applogs" . ) .Values.volume.logs.existingClaim }}
-        {{- end }}
-        {{- if .Values.secrets.secretProviderClass }}
+       {{- if .Values.secrets.secretProviderClass }}
         - name: secrets-store-inline
           csi:
             driver: secrets-store.csi.k8s.io

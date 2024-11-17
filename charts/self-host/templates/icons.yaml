@@ -42,6 +42,7 @@ spec:
         volumeMounts:
           - name: applogs
             mountPath: /logs
+            subPath: applogs/icons
     {{- end }}
       containers:
       - name: {{ template "bitwarden.icons" . }}
@@ -76,7 +77,7 @@ spec:
         {{- if .Values.volume.logs.enabled }}
         - name: applogs
           mountPath: /etc/bitwarden/logs
-          subPath: icons
+          subPath: applogs/icons
         {{- end }}
         resources:
 {{ toYaml .Values.component.icons.resources | indent 10 }}

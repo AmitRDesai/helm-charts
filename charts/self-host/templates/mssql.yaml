@@ -53,53 +53,50 @@ spec:
             - name: mssql
               containerPort: 1433
           volumeMounts:
-            - name: mssql-data
+            - name: data
               mountPath: /var/opt/mssql/data
-            - name: mssql-log
+              subPath: db/data
+            - name: data
               mountPath: /var/opt/mssql/log
-            - name: mssql-backups
+              subPath: db/log
+            - name: data
               mountPath: /var/opt/mssql/backups
+              subPath: db/backups
             {{- if .Values.secrets.secretProviderClass }}
             - name: secrets-store-inline
               mountPath: "/mnt/secrets-store"
               readOnly: true
             {{- end }}
-          livenessProbe:
-            tcpSocket:
-              port: mssql
-            initialDelaySeconds: 30
-            periodSeconds: 10
-            timeoutSeconds: 5
-          readinessProbe:
-            tcpSocket:
-              port: mssql
-            initialDelaySeconds: 5
-            periodSeconds: 2
-            timeoutSeconds: 1
-          startupProbe:
-            exec:
-              command:
-                - '/bin/sh'
-                - '-c'
-                - '/opt/mssql-tools/bin/sqlcmd -S localhost -U sa -P ${SA_PASSWORD} -Q "SELECT 1" || exit 1'
-            initialDelaySeconds: 120
-            periodSeconds: 10
-            timeoutSeconds: 3
+          # livenessProbe:
+          #   tcpSocket:
+          #     port: mssql
+          #   initialDelaySeconds: 30
+          #   periodSeconds: 10
+          #   timeoutSeconds: 5
+          # readinessProbe:
+          #   tcpSocket:
+          #     port: mssql
+          #   initialDelaySeconds: 5
+          #   periodSeconds: 2
+          #   timeoutSeconds: 1
+          # startupProbe:
+          #   exec:
+          #     command:
+          #       - '/bin/sh'
+          #       - '-c'
+          #       - '/opt/mssql-tools18/bin/sqlcmd -S localhost -U sa -P ${SA_PASSWORD} -C -Q "SELECT 1" || exit 1'
+          #   initialDelaySeconds: 120
+          #   periodSeconds: 10
+          #   timeoutSeconds: 3
           {{- if .Values.database.securityContext }}
           securityContext:
 {{ toYaml .Values.database.securityContext | indent 12 }}
           {{- end }}
       enableServiceLinks: false
       volumes:
-        - name: mssql-data
+        - name: data
           persistentVolumeClaim:
             claimName: {{ default ( include "bitwarden.mssqlData" . ) .Values.database.volume.data.existingClaim }}
-        - name: mssql-log
-          persistentVolumeClaim:
-            claimName: {{ default ( include "bitwarden.mssqlLog" . ) .Values.database.volume.log.existingClaim }}
-        - name: mssql-backups
-          persistentVolumeClaim:
-            claimName: {{ default ( include "bitwarden.mssqlBackups" . ) .Values.database.volume.backups.existingClaim }}
         {{- if .Values.secrets.secretProviderClass }}
         - name: secrets-store-inline
           csi:

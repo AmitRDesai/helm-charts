@@ -42,6 +42,7 @@ spec:
         volumeMounts:
           - name: applogs
             mountPath: /logs
+            subPath: applogs/identity
     {{- end }}
       containers:
       - name: {{ template "bitwarden.identity" . }}
@@ -74,14 +75,16 @@ spec:
         volumeMounts:
         - name: identity
           mountPath: /etc/bitwarden/identity
-        - name: dataprotection
+        - name: data
           mountPath: /etc/bitwarden/core/aspnet-dataprotection
-        - name: licenses
+          subPath: dataprotection
+        - name: data
           mountPath: /etc/bitwarden/core/licenses
+          subPath: licenses
         {{- if .Values.volume.logs.enabled }}
-        - name: applogs
+        - name: data
           mountPath: /etc/bitwarden/logs
-          subPath: identity
+          subPath: applogs/identity
         {{- end }}
         {{- if .Values.secrets.secretProviderClass}}
         - name: secrets-store-inline
@@ -94,17 +97,9 @@ spec:
         - name: identity
           secret:
             secretName: {{ .Release.Name }}-identity-cert
-        - name: dataprotection
+        - name: data
           persistentVolumeClaim:
             claimName: {{ default ( include "bitwarden.dataprotection" . ) .Values.volume.dataprotection.existingClaim }}
-        - name: licenses
-          persistentVolumeClaim:
-            claimName: {{ default ( include "bitwarden.licenses" . ) .Values.volume.licenses.existingClaim }}
-        {{- if .Values.volume.logs.enabled }}
-        - name: applogs
-          persistentVolumeClaim:
-            claimName: {{ default ( include "bitwarden.applogs" . ) .Values.volume.logs.existingClaim }}
-        {{- end }}
         {{- if .Values.secrets.secretProviderClass }}
         - name: secrets-store-inline
           csi:
